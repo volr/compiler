@@ -1,0 +1,27 @@
+module EvaluatorSpec (main, spec) where
+
+import qualified Data.Map.Strict as Map
+
+import Test.Hspec
+
+import AST
+import Evaluator
+
+main :: IO()
+main = hspec spec
+
+spec :: Spec
+spec = do
+  describe "The evaluator" $ do
+    it "can evaluate sequential connection of two networks" $ do
+      let e = TmSeq (TmNet 1 1) (TmNet 1 1)
+      eval e `shouldBe` Right e
+    it "can evaluate parallel connection of two networks" $ do
+      let e = TmPar (TmNet 1 1) (TmNet 1 1)
+      eval e `shouldBe` Right e
+    it "can evaluate a let binding" $ do
+      let e = TmLet "x" (TmNet 1 1) (TmNet 2 2)
+      eval e `shouldBe` Right (TmNet 2 2)
+    it "can evaluate a let binding with a reference" $ do
+      let e = TmLet "x" (TmNet 1 1) (TmRef "x")
+      eval e `shouldBe` Right (TmNet 1 1)
