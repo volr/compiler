@@ -1,10 +1,10 @@
-name:                futhark-backend
+name:                volr
 version:             0.1.0.0
-github:              "githubuser/futhark-backend"
+github:              "volr/compiler"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2018 Author name here"
+author:              "Jens Egholm Pedersen"
+maintainer:          "jensegholm@protonmail.com"
+copyright:           "2018 Jens Egholm Pedersen"
 
 extra-source-files:
 - README.md
@@ -38,7 +38,7 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - futhark-backend
+    - volr
 
 tests:
   futhark-backend-test:
@@ -50,6 +50,6 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - containers >= 0.5.11.0
-    - futhark-backend
+    - volr
     - hspec
     - mtl >= 2.2.1
