@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 87f16b4295c3ed29992f0c4298880a568ada3289e534454916e2bea93f20f143
+-- hash: 8e582368684118c9adea3ef46d5eeb178bb0efc45f11ffca27cd5c42e8b7d3c6
 
 name:           volr
 version:        0.1.0.0
@@ -37,6 +37,9 @@ library
       base >=4.7 && <5
     , containers >=0.5.11.0
     , mtl >=2.2.1
+    , neat-interpolation >=0.3.2.2
+    , raw-strings-qq
+    , text >=0.11.2.0
   default-language: Haskell2010
 
 executable futhark-backend-exe
@@ -56,6 +59,7 @@ test-suite futhark-backend-test
   main-is: Spec.hs
   other-modules:
       EvaluatorSpec
+      Generate.FutharkSpec
       Paths_volr
   hs-source-dirs:
       test
@@ -65,5 +69,6 @@ test-suite futhark-backend-test
     , containers >=0.5.11.0
     , hspec
     , mtl >=2.2.1
+    , raw-strings-qq
     , volr
   default-language: Haskell2010

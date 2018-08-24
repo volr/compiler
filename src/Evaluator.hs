@@ -35,7 +35,7 @@ eval' term =
         state <- get
         case store state Map.!? n of
           Nothing -> throwError $ "Could not find reference of name " ++ n
-          Just m -> return m
+          Just m -> return (TmRef n)
     TmLet name t1 t2 -> do
         state <- get
         t1' <- eval' t1
