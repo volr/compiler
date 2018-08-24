@@ -52,3 +52,4 @@ tests:
     - containers >= 0.5.11.0
     - futhark-backend
     - hspec
+    - mtl >= 2.2.1

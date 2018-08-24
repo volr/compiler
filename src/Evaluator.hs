@@ -11,6 +11,7 @@ import AST
 
 type Error = String
 data TermState = TermState { types :: Context, store :: Store }
+  deriving (Eq, Show)
 type EvalState = ExceptT Error (State TermState)
 
 emptyState = TermState Map.empty Map.empty

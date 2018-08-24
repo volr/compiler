@@ -1,5 +1,8 @@
 module EvaluatorSpec (main, spec) where
 
+import Control.Monad.Except
+import Control.Monad.State.Lazy
+
 import qualified Data.Map.Strict as Map
 
 import Test.Hspec
@@ -25,3 +28,7 @@ spec = do
     it "can evaluate a let binding with a reference" $ do
       let e = TmLet "x" (TmNet 1 1) (TmRef "x")
       eval e `shouldBe` Right (TmNet 1 1)
+    it "can evaluate a let binding and discard the inner context" $ do
+      let e = TmLet "x" (TmNet 1 1) (TmRef "x")
+      let s = execState (runExceptT $ eval' e) emptyState
+      s `shouldBe` emptyState
