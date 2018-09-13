@@ -10,6 +10,7 @@ import qualified Data.Map.Strict as Map
 import AST
 
 type Error = String
+
 data TermState = TermState { types :: Context, store :: Store }
   deriving (Eq, Show)
 type EvalState = ExceptT Error (State TermState)
@@ -72,7 +73,7 @@ typeOf term =
 sizeLeft :: Term -> EvalState Int
 sizeLeft term = 
   case term of 
-    TmNet _ m -> return m 
+    TmNet m _ -> return m 
     TmSeq t1 t2 -> sizeLeft t1 
     TmPar t1 t2 -> sizeLeft t1
     _ -> throwError $ "Cannot extract size from term " ++ (show term)

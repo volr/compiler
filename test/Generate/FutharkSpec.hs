@@ -21,11 +21,12 @@ spec = do
     it "can generate a simple NN program" $ do
       let f = FutharkProgram { train = 1, validation = 1, batchSize = 1, alpha = 0.1, lossFunction = CrossEntropy}
       let o = compile f (TmNet 1 2)
-      o `shouldBe` Right simpleProgram
-    where simpleProgram = [r|import "../lib/deep_learning"
+      let simpleProgram = [r|import "../lib/deep_learning"
 module dl = deep_learning f32
 
-let nn = dl.layers.dense (1, 2) dl.nn.sigmoid 1
+let x0 = dl.layers.dense (1, 2) dl.nn.sigmoid 1
+
+let nn = x0
 let main [m] (input:[m][]dl.t) (labels:[m][]dl.t) =
   let train = 1
   let validation = 1
@@ -37,3 +38,26 @@ let main [m] (input:[m][]dl.t) (labels:[m][]dl.t) =
   in dl.nn.accuracy nn' input[train:train+validation]
      labels[train:train+validation] dl.nn.softmax dl.nn.argmax
 |]
+      o `shouldBe` Right simpleProgram
+  describe "The Futhark compiler" $ do
+    it "can dereference a simple network" $ do
+      let out = compile' (TmNet 1 1)
+      out `shouldBe` Right(1, "let x0 = dl.layers.dense (1, 1) dl.nn.sigmoid 1\n")
+    it "can split a network" $ do
+      let out = compile' $ TmPar (TmNet 1 1) (TmNet 1 1)
+      out `shouldBe` Right(2, "let x0 = dl.layers.replicate 1 dl.nn.sigmoid 1\n" ++
+			      "let x1 = dl.layers.merge (1, 1) dl.nn.sigmoid 1\n" ++ 
+			      "let nn = dl.nn.connect_layers x0 x1"
+			    )
+    it "can split a network with different sizes" $ do
+      let out = compile' $ TmPar (TmNet 1 1) (TmNet 1 2)
+      out `shouldBe` Right(2, "let x0 = dl.layers.replicate 1 dl.nn.sigmoid 1\n" ++
+			      "let x1 = dl.layers.dense (1, 1) dl.nn.sigmoid 1\n" ++
+			      "let x2 = dl.layers.dense (1, 2) dl.nn.sigmoid 1\n" ++
+			      "let x3 = dl.layers.merge ([1, 2], 2) dl.nn.sigmoid 1\n" ++ 
+			      "let n0 = dl.nn.connect_parallel x1 x2\n" ++ 
+			      "let n1 = dl.nn.connect_layers x0 n0\n" ++
+			      "let nn = dl.nn.connect_layers n1 x3"
+			    )
+    --it "can split two nodes by replicating them" $ do
+    --  compile'
