@@ -23,7 +23,6 @@ spec = do
       let o = compile f (TmNet 1 2)
       let simpleProgram = [r|import "../lib/deep_learning"
 module dl = deep_learning f32
-
 let x0 = dl.layers.dense (1, 2) dl.nn.sigmoid 1
 
 let nn = x0
@@ -45,19 +44,26 @@ let main [m] (input:[m][]dl.t) (labels:[m][]dl.t) =
       out `shouldBe` Right(1, "let x0 = dl.layers.dense (1, 1) dl.nn.sigmoid 1\n")
     it "can split a network" $ do
       let out = compile' $ TmPar (TmNet 1 1) (TmNet 1 1)
-      out `shouldBe` Right(2, "let x0 = dl.layers.replicate 1 dl.nn.sigmoid 1\n" ++
-			      "let x1 = dl.layers.merge (1, 1) dl.nn.sigmoid 1\n" ++ 
-			      "let nn = dl.nn.connect_layers x0 x1"
+      out `shouldBe` Right(3, "let x0 = dl.layers.dense (1, 1) dl.nn.sigmoid 1\n" ++
+			      "let x1 = dl.layers.dense (1, 1) dl.nn.sigmoid 1\n" ++ 
+			      "let x2 = dl.nn.connect_parallel (x0, x1)\n"
 			    )
     it "can split a network with different sizes" $ do
       let out = compile' $ TmPar (TmNet 1 1) (TmNet 1 2)
-      out `shouldBe` Right(2, "let x0 = dl.layers.replicate 1 dl.nn.sigmoid 1\n" ++
-			      "let x1 = dl.layers.dense (1, 1) dl.nn.sigmoid 1\n" ++
-			      "let x2 = dl.layers.dense (1, 2) dl.nn.sigmoid 1\n" ++
-			      "let x3 = dl.layers.merge ([1, 2], 2) dl.nn.sigmoid 1\n" ++ 
-			      "let n0 = dl.nn.connect_parallel x1 x2\n" ++ 
-			      "let n1 = dl.nn.connect_layers x0 n0\n" ++
-			      "let nn = dl.nn.connect_layers n1 x3"
+      out `shouldBe` Right(3, "let x0 = dl.layers.dense (1, 1) dl.nn.sigmoid 1\n" ++
+			      "let x1 = dl.layers.dense (1, 2) dl.nn.sigmoid 1\n" ++
+			      "let x2 = dl.nn.connect_parallel (x0, x1)\n"
 			    )
-    --it "can split two nodes by replicating them" $ do
-    --  compile'
+    it "can connect a sequential and parallel network" $ do
+      let out = compile' $ TmSeq (TmNet 1 1) (TmPar (TmNet 1 1) (TmNet 1 1))
+      out `shouldBe` Right(9, [r|let x0 = dl.layers.dense (1, 1) dl.nn.sigmoid 1
+let x1 = dl.layers.replicate 1 dl.nn.sigmoid 1
+let x2 = dl.nn.connect_layers (x0, x1)
+let x3 = dl.layers.dense (1, 1) dl.nn.sigmoid 1
+let x4 = dl.layers.dense (1, 1) dl.nn.sigmoid 1
+let x5 = dl.nn.connect_parallel (x3, x4)
+let x6 = dl.nn.connect_layers (x2, x5)
+let x7 = dl.layers.merge (1, 1)
+let x8 = dl.nn.connect_layers (x6, x7)
+|])
+

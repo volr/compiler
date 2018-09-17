@@ -86,15 +86,14 @@ compile' term =
   let (value, state) = runState (runExceptT $ dereference term) emptyNetworkState
   in   case value of
     Left error -> Left error 
-    Right v -> Right (v, f state)
+    Right v -> Right (v + 1, f state)
   where 
     f (NetworkState definitions _) =
       unlines . map (\(d, i) -> "let " ++ (toName i) ++ " = " ++ d) $ zip definitions [0..(length definitions)]
   
 dereference :: Term -> CompileState Int
 dereference (TmNet n m) = do
-  state <- get
-  put $ state { definitions = (definitions state) ++ [dense n m Sigmoid 1]}
+  addDefinition $ denseLayer n m Sigmoid 1
   deBruijn
 dereference (TmRef name) = do
   state <- get
@@ -111,51 +110,57 @@ dereference (TmLet name t1 t2) = do
   return index'
 dereference (TmSeq (TmNet l1 l2) (TmPar r1 r2)) = do
   indexLeft <- dereference (TmNet l1 l2)
+  indexRep <- addDefinition $ replicateLayer l2 Sigmoid 1
+  connLeft <- addDefinition $  sequentialConnection indexLeft indexRep
   indexP1 <- dereference r1
-  indexP2 <- dereferenxe r2
-  sl <- sizeRight s
-  s1 <- sizeLeft p1
-  s2 <- sizeLeft p2
-  indexRep <- addDefinition $ replicate sr Sigmoid 1
-  eq1 <- sequential sr s1 
-  indexPar <- addDefinition $ parallel ip1 ip2
-  indexSeq <- addDefinition $ sequential indexRep indexPar
+  indexP2 <- dereference r2
+  connPar <- addDefinition $ parallelConnection indexP1 indexP2
+  connSeq <- addDefinition $ sequentialConnection connLeft connPar
+  sizePar1 <- sizeRight r1
+  sizePar2 <- sizeRight r2
+  indexMerge <- addDefinition $ mergeLayer sizePar1 sizePar2
+  addDefinition $ sequentialConnection connSeq indexMerge
   deBruijn
 dereference (TmSeq (TmPar l1 l2) (TmNet r1 r2)) = do
   indexLeft <- dereference (TmPar l1 l2)
-  index p1
+  return 0 -- TODO
 dereference (TmPar t1 t2) = do
   i1 <- dereference t1
   i2 <- dereference t2
-  put $ state { definition = definitions state ++ [parallel i1 i2]
+  addDefinition $ parallelConnection i1 i2
   deBruijn
 
 addDefinition :: String -> CompileState Int
-addDefinition l = do 
-  state <- get
-  put $ state { definitions = definitions state ++ [l] }
-  deBruijn
+addDefinition name =
+  do 
+    state <- get
+    put $ state { definitions = definitions state ++ [name] }
+    deBruijn
 
 deBruijn :: CompileState Int
 deBruijn = do
   state <- get
-  return $ length $ definitions state
+  return $ (length $ definitions state) - 1
 
-dense :: Int -> Int -> Activation -> Int -> String
-dense i o activation seed = 
+denseLayer :: Int -> Int -> Activation -> Int -> String
+denseLayer i o activation seed = 
   printf "dl.layers.dense (%d, %d) %s %d" i o (show activation) seed
 
-replicate :: Int -> Activation -> Int -> String
-replicate i activation seed = 
-  printf "dl.layers.replicate %d %s %d" i activation seed
+replicateLayer :: Int -> Activation -> Int -> String
+replicateLayer i activation seed = 
+  printf "dl.layers.replicate %d %s %d" i (show activation) seed
 
-sequential :: Int -> Int -> String
-sequential n m = 
-  printf "dl.layers.connect_layers (x%d, x%d)" n m
+mergeLayer :: Int -> Int -> String
+mergeLayer i1 i2 = 
+  printf "dl.layers.merge (%d, %d)" i1 i2
 
-parallel :: Int -> Int -> String
-parallel a b = 
-  printf "dl.nn.connect_parallel (x%s, x%s)" a b
+sequentialConnection :: Int -> Int -> String
+sequentialConnection n m = 
+  printf "dl.nn.connect_layers (x%d, x%d)" n m
+
+parallelConnection :: Int -> Int -> String
+parallelConnection a b = 
+  printf "dl.nn.connect_parallel (x%d, x%d)" a b
 
 toName :: Int -> String
 toName = (++) "x" . show
