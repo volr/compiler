@@ -23,8 +23,8 @@ parse code = runParser parseTerm "" code
 parseTerm :: Parser Term
 parseTerm = lexeme $ choice
   [ TmNet <$> (symbol "Net" *> integer) <*> integer
-  , TmPar <$> (symbol "Par" *> parseTerm) <*> parseTerm
-  , TmSeq <$> (symbol "Seq" *> parseTerm) <*> parseTerm
+  , TmPar <$> (symbol "Par" *> (parens parseTerm)) <*> (parens parseTerm)
+  , TmSeq <$> (symbol "Seq" *> (parens parseTerm)) <*> (parens parseTerm)
   ]
 
 integer :: Parser Int
