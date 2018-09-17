@@ -29,6 +29,7 @@ library:
   - containers >= 0.5.11.0
   - raw-strings-qq
   - neat-interpolation >= 0.3.2.2
+  - megaparsec
   - text >= 0.11.2.0
 
 executables:
@@ -54,5 +55,6 @@ tests:
     - containers >= 0.5.11.0
     - volr
     - hspec
+    - megaparsec
     - mtl >= 2.2.1
     - raw-strings-qq

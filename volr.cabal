@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8e582368684118c9adea3ef46d5eeb178bb0efc45f11ffca27cd5c42e8b7d3c6
+-- hash: f0f2e351890530cfa332bcf87b954ce4ab73bf91ff69408c264d28ddf5dee6b8
 
 name:           volr
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
       AST
       Evaluator
       Generate.Futhark
+      Parser
   other-modules:
       Paths_volr
   hs-source-dirs:
@@ -36,6 +37,7 @@ library
   build-depends:
       base >=4.7 && <5
     , containers >=0.5.11.0
+    , megaparsec
     , mtl >=2.2.1
     , neat-interpolation >=0.3.2.2
     , raw-strings-qq
@@ -60,6 +62,7 @@ test-suite futhark-backend-test
   other-modules:
       EvaluatorSpec
       Generate.FutharkSpec
+      ParserSpec
       Paths_volr
   hs-source-dirs:
       test
@@ -68,6 +71,7 @@ test-suite futhark-backend-test
       base >=4.7 && <5
     , containers >=0.5.11.0
     , hspec
+    , megaparsec
     , mtl >=2.2.1
     , raw-strings-qq
     , volr

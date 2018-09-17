@@ -86,4 +86,5 @@ let x4 = dl.layers.dense (1, 2) dl.nn.sigmoid 1
 let x5 = dl.nn.connect_parallel (x3, x4)
 let x6 = dl.nn.connect_layers (x2, x5)
 |])
+    
 
