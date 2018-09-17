@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f0f2e351890530cfa332bcf87b954ce4ab73bf91ff69408c264d28ddf5dee6b8
+-- hash: 06d62ffd548d84834ea82201674382d76d0fd3c66e2e982404c22060141189f8
 
 name:           volr
 version:        0.1.0.0
@@ -53,6 +53,8 @@ executable futhark-backend-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , optparse-applicative
+    , strict
     , volr
   default-language: Haskell2010
 

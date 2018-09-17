@@ -21,11 +21,11 @@ parse :: String -> Either SyntaxError Term
 parse code = runParser parseTerm "" code
 
 parseTerm :: Parser Term
-parseTerm = lexeme $ choice
+parseTerm = (lexeme $ choice
   [ TmNet <$> (symbol "Net" *> integer) <*> integer
   , TmPar <$> (symbol "Par" *> (parens parseTerm)) <*> (parens parseTerm)
   , TmSeq <$> (symbol "Seq" *> (parens parseTerm)) <*> (parens parseTerm)
-  ]
+  ]) <* (optional eof)
 
 integer :: Parser Int
 integer = lexeme Lexer.decimal

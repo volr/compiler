@@ -41,6 +41,8 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - optparse-applicative
+    - strict
     - volr
 
 tests:
