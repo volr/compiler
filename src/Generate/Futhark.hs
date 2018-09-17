@@ -123,7 +123,21 @@ dereference (TmSeq (TmNet l1 l2) (TmPar r1 r2)) = do
   deBruijn
 dereference (TmSeq (TmPar l1 l2) (TmNet r1 r2)) = do
   indexLeft <- dereference (TmPar l1 l2)
-  return 0 -- TODO
+  size1 <- sizeRight l1
+  size2 <- sizeRight l2
+  indexMerge <- addDefinition $ mergeLayer size1 size2
+  connMerge <- addDefinition $ sequentialConnection indexLeft indexMerge
+  indexDense <- addDefinition $ denseLayer r1 r2 Sigmoid 1
+  addDefinition $ sequentialConnection connMerge indexDense
+  deBruijn
+dereference (TmSeq (TmPar l1 l2) (TmPar r1 r2)) = do
+  indexLTop <- dereference l1
+  indexLBottom <- dereference l2
+  connLeft <- addDefinition $ parallelConnection indexLTop indexLBottom
+  indexRTop <- dereference r1
+  indexRBottom <- dereference r2
+  connRight <- addDefinition $ parallelConnection indexRTop indexRBottom
+  addDefinition $ sequentialConnection connLeft connRight
 dereference (TmPar t1 t2) = do
   i1 <- dereference t1
   i2 <- dereference t2
