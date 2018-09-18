@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 06d62ffd548d84834ea82201674382d76d0fd3c66e2e982404c22060141189f8
+-- hash: 6efd710bf03c606978c32508c8ea37c72b6cde82429afec8f59f46aab33a4ec2
 
 name:           volr
 version:        0.1.0.0
@@ -44,7 +44,7 @@ library
     , text >=0.11.2.0
   default-language: Haskell2010
 
-executable futhark-backend-exe
+executable volrc
   main-is: Main.hs
   other-modules:
       Paths_volr

@@ -33,7 +33,7 @@ library:
   - text >= 0.11.2.0
 
 executables:
-  futhark-backend-exe:
+  volrc:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
