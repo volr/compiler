@@ -1,6 +1,5 @@
 module Main where
 
-import qualified System.IO.Strict as S
 
 import Data.Semigroup ((<>))
 import Options.Applicative
@@ -9,6 +8,7 @@ import System.IO (hPutStrLn, stderr)
 
 import AST
 import qualified Parser as VolrParser
+import qualified Generate.Futhark as Futhark
 
 data Configuration = Configuration
   { input :: Input
@@ -49,7 +49,14 @@ parseConfig = Configuration
 
 readInput :: Input -> IO String
 readInput (FileInput file) = readFile file
-readInput StdInput = S.getContents
+readInput StdInput = getContents
+
+compileProgram :: Term -> IO ()
+compileProgram term =
+  let program = Futhark.FutharkProgram 1 1 1 0.1 Futhark.CrossEntropy 
+  in  case Futhark.compile program term of
+	Left error -> hPutStrLn stderr error
+	Right code -> putStrLn code
 
 main :: IO ()
 main = do
@@ -57,7 +64,7 @@ main = do
   content <- readInput input
   case VolrParser.parse content of
     Left error -> hPutStrLn stderr $ show error
-    Right term -> putStrLn (show term)
+    Right term -> compileProgram term
   where
     configuration = info (parseConfig <**> helper)
       ( fullDesc
