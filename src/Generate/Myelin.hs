@@ -17,12 +17,12 @@ data Target
 
 compile :: Target -> Term -> ByteString
 compile target term =
-  let ((_, output), inputBlock) = runState (compile' term) initialBlockState
-      block = inputBlock & outputs .~ output
+  let ((input, output), rawBlock) = runState (compile' term) initialBlockState
+      block = rawBlock & outputs .~ output & inputs .~ input
       network = Network [block]
       myelinTarget = case target of
         Simulation -> Nest 0 0
-	Hardware -> BrainScaleS 0 0
+        Hardware -> BrainScaleS 0 0
       task = Task myelinTarget network 0
   in encode task
 
@@ -32,22 +32,34 @@ compile' (TmNet l r) = do
   p2 <- lifPopulation r
   projection (AllToAll 1.0 False) (Static Excitatory) p1 p2 
   return ([p1], [p2])
+compile' (TmSeq (TmPar lt lb) (TmPar rt rb)) = do
+  (lt1, lt2) <- compile' lt
+  (lb1, lb2) <- compile' lb
+  (rt1, rt2) <- compile' rt
+  (rb1, rb2) <- compile' rb
+  projectAll (lt2 ++ lb2) (rt1 ++ rb1)
+  return (lt1 ++ lb1, rt2 ++ rb2)
 compile' (TmSeq (TmPar lt lb) r) = do
   (lt1, lt2) <- compile' lt
   (lb1, lb2) <- compile' lb
   (r1, r2) <- compile' r
-  projectAll lt2 r1
-  projectAll lb2 r1
+  projectAll (lt2 ++ lb2) r1
   return (lt1 ++ lb1, r2)
--- compile' (TmSeq l (TmPar bl br) = do
---   (l1, l2) <- compile' l 
---   (r1, r2) <- compile' b1
---   
---   return ([l1], [r2])
--- compile' (TmPar t b) = do
---   (t1, t2) <- compile' t
---   (b1, b2) <- compile' b
---   return ([t1, b1], [t2, b2])
+compile' (TmSeq l (TmPar lt lb)) = do
+  (l1, l2) <- compile' l 
+  (lt1, lt2) <- compile' lt
+  (lb1, lb2) <- compile' lb
+  projectAll l2 (lt1 ++ lb1)
+  return (l1, lt2 ++ lb2)
+compile' (TmSeq l r) = do
+  (l1, l2) <- compile' l
+  (r1, r2) <- compile' r
+  projectAll l2 r1
+  return (l1, r2)
+compile' (TmPar t b) = do
+  (t1, t2) <- compile' t
+  (b1, b2) <- compile' b
+  return (t1 ++ b1, t2 ++ b2)
 
 projectAll :: [Node] -> [Node] -> SNN () Identity
 projectAll lefts rights = do
