@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6efd710bf03c606978c32508c8ea37c72b6cde82429afec8f59f46aab33a4ec2
+-- hash: f165cd138517f812b5cef32b327f40ff6d177be034f242f213b632d668d84a3a
 
 name:           volr
 version:        0.1.0.0
@@ -29,16 +29,21 @@ library
       AST
       Evaluator
       Generate.Futhark
+      Generate.Myelin
       Parser
   other-modules:
       Paths_volr
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
+    , bytestring
     , containers >=0.5.11.0
+    , lens
     , megaparsec
     , mtl >=2.2.1
+    , myelin
     , neat-interpolation >=0.3.2.2
     , raw-strings-qq
     , text >=0.11.2.0
@@ -64,17 +69,21 @@ test-suite futhark-backend-test
   other-modules:
       EvaluatorSpec
       Generate.FutharkSpec
+      Generate.MyelinSpec
       ParserSpec
       Paths_volr
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , base >=4.7 && <5
+    , bytestring
     , containers >=0.5.11.0
     , hspec
     , megaparsec
     , mtl >=2.2.1
+    , myelin
     , raw-strings-qq
     , volr
   default-language: Haskell2010

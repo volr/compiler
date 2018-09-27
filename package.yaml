@@ -25,11 +25,15 @@ dependencies:
 library:
   source-dirs: src
   dependencies:
-  - mtl >= 2.2.1
+  - aeson
+  - bytestring
   - containers >= 0.5.11.0
-  - raw-strings-qq
-  - neat-interpolation >= 0.3.2.2
+  - lens
   - megaparsec
+  - mtl >= 2.2.1
+  - myelin
+  - neat-interpolation >= 0.3.2.2
+  - raw-strings-qq
   - text >= 0.11.2.0
 
 executables:
@@ -54,7 +58,10 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - aeson
+    - bytestring
     - containers >= 0.5.11.0
+    - myelin
     - volr
     - hspec
     - megaparsec

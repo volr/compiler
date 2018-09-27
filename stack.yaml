@@ -38,7 +38,9 @@ packages:
 # Dependency packages to be pulled from upstream that are not in the resolver
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
-# extra-deps: []
+extra-deps:
+- git: git@github.com:volr/myelin
+  commit: 0d830848a7ca16676d55bd16f67a5679a474cadd
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
