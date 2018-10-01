@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f165cd138517f812b5cef32b327f40ff6d177be034f242f213b632d668d84a3a
+-- hash: 716c846dbc4a8debbea8672e3454050bfd87d7779f15d9593d00ce6106b7fb06
 
 name:           volr
 version:        0.1.0.0
@@ -58,6 +58,7 @@ executable volrc
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring
     , optparse-applicative
     , strict
     , volr

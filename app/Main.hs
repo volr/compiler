@@ -1,6 +1,6 @@
 module Main where
 
-
+import qualified Data.ByteString.Lazy.Char8 as BS
 import Data.Semigroup ((<>))
 import Options.Applicative
 
@@ -9,21 +9,23 @@ import System.IO (hPutStrLn, stderr)
 import AST
 import qualified Parser as VolrParser
 import qualified Generate.Futhark as Futhark
+import qualified Generate.Myelin as Myelin
 
 data Configuration = Configuration
   { input :: Input
+  , backend :: Backend
   }
 
 data Backend 
   = Futhark
+  | Nest
+  | BrainScaleS
+  deriving (Eq, Show)
 
 data Input 
   = FileInput String
   | StdInput
-
-data Syntax
-  = Simple
-  | Complex
+  deriving (Eq, Show)
 
 parseFileInput :: Parser Input
 parseFileInput = FileInput <$> strOption
@@ -33,38 +35,42 @@ parseFileInput = FileInput <$> strOption
   <> help "input volr file"
   )
 
---parseSyntaxType :: Parser Syntax
---parseSyntaxType = (simple <|> complex) <> value Simple
---  where
---    simple = flag' Simple (long "simple" <> help "Toggle Simple Volr syntax")
---    complex = flag' Complex (long "complex" <> help "Toggle Complex Volr syntax")   
+parseBackend :: Parser Backend
+parseBackend = subparser
+  (  command "futhark" (info (pure Futhark) (progDesc "Generates Futhark code"))
+  <> command "nest" (info (pure Nest) (progDesc "Generates NEST JSON"))
+  <> metavar "BACKEND"
+  ) <|> (pure Futhark)
 
 parseInput :: Parser Input
-parseInput = parseFileInput
-  <|> pure StdInput
+parseInput = parseFileInput <|> (pure StdInput)
 
 parseConfig :: Parser Configuration
 parseConfig = Configuration
-  <$> parseInput
+  <$> parseInput <*> parseBackend
 
 readInput :: Input -> IO String
 readInput (FileInput file) = readFile file
 readInput StdInput = getContents
 
-compileProgram :: Term -> IO ()
-compileProgram term =
-  let program = Futhark.FutharkProgram 1 1 1 0.1 Futhark.CrossEntropy 
-  in  case Futhark.compile program term of
-	Left error -> hPutStrLn stderr error
-	Right code -> putStrLn code
+compileProgram :: Term -> Backend -> IO ()
+compileProgram term backend =
+  case backend of
+    Futhark -> 
+      let program = Futhark.FutharkProgram 1 1 1 0.1 Futhark.CrossEntropy 
+      in  case Futhark.compile program term of
+            Left error -> hPutStrLn stderr error
+            Right code -> putStrLn code
+    Nest -> 
+      BS.putStrLn $ Myelin.compile Myelin.Simulation term 
 
 main :: IO ()
 main = do
-  (Configuration input) <- execParser configuration
+  (Configuration input backend) <- execParser configuration
   content <- readInput input
   case VolrParser.parse content of
     Left error -> hPutStrLn stderr $ show error
-    Right term -> compileProgram term
+    Right term -> compileProgram term backend
   where
     configuration = info (parseConfig <**> helper)
       ( fullDesc
