@@ -138,6 +138,10 @@ dereference (TmSeq (TmPar l1 l2) (TmPar r1 r2)) = do
   indexRBottom <- dereference r2
   connRight <- addDefinition $ parallelConnection indexRTop indexRBottom
   addDefinition $ sequentialConnection connLeft connRight
+dereference (TmSeq t1 t2) = do
+  n1 <- dereference t1
+  n2 <- dereference t2
+  addDefinition $ sequentialConnection n1 n2
 dereference (TmPar t1 t2) = do
   i1 <- dereference t1
   i2 <- dereference t2
