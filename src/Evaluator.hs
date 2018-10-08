@@ -18,7 +18,11 @@ type EvalState = ExceptT Error (State TermState)
 emptyState = TermState Map.empty Map.empty
 
 eval :: Term -> Either Error Term
-eval term = evalState (runExceptT $ eval' term) emptyState
+eval term = evalState (runExceptT (evalTyped term)) emptyState
+  where
+    evalTyped term = do
+      untyped <- eval' term
+      typeOf untyped *> return untyped
 
 eval' :: Term -> EvalState Term
 eval' term =
@@ -36,7 +40,7 @@ eval' term =
         state <- get
         case store state Map.!? n of
           Nothing -> throwError $ "Could not find reference of name " ++ n
-          Just m -> return (TmRef n)
+          Just m -> return m 
     TmLet name t1 t2 -> do
         state <- get
         t1' <- eval' t1
@@ -55,9 +59,15 @@ typeOf term =
   case term of
     TmNet n m -> return $ TyNetwork n m
     TmSeq t1 t2 -> do
-      left <- sizeLeft t1
-      right <- sizeRight t2
-      return $ TyNetwork left right
+      leftOut <- sizeRight t1
+      rightIn <- sizeLeft t2
+      if leftOut == rightIn then do
+        leftIn <- sizeLeft t1
+        rightOut <- sizeRight t2
+        return $ TyNetwork leftIn rightOut 
+      else
+        throwError $ "Type error: Incompatible network sizes. Output " ++ 
+                     (show leftOut) ++ " should be equal to input " ++ (show rightIn)
     TmPar t1 t2 -> do
       left1 <- sizeLeft t1 
       left2 <- sizeLeft t2
@@ -76,6 +86,11 @@ sizeLeft term =
     TmNet m _ -> return m 
     TmSeq t1 t2 -> sizeLeft t1 
     TmPar t1 t2 -> sizeLeft t1
+    TmRef n -> do
+      state <- get
+      case store state Map.!? n of
+        Nothing -> throwError $ "Unknown reference " ++ n
+        Just e -> sizeLeft e
     _ -> throwError $ "Cannot extract size from term " ++ (show term)
 
 sizeRight :: Term -> EvalState Int
@@ -84,6 +99,11 @@ sizeRight term =
     TmNet _ m -> return m 
     TmSeq t1 t2 -> sizeRight t2
     TmPar t1 t2 -> sizeRight t2
+    TmRef n -> do
+      state <- get
+      case store state Map.!? n of
+        Nothing -> throwError $ "Unknown reference " ++ n
+        Just e -> sizeRight e
     _ -> throwError $ "Cannot extract size from term " ++ (show term)
 
     

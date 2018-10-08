@@ -3,6 +3,7 @@ module Parser where
 import Control.Applicative hiding (many, some)
 import Control.Monad.State.Lazy
 
+import Data.Bifunctor  
 import Data.Functor
 import qualified Data.Map as Map
 import Data.Maybe (isJust)
@@ -13,18 +14,23 @@ import qualified Text.Megaparsec.Char.Lexer as Lexer
 import qualified Text.Megaparsec.Pos as Pos
 
 import AST
+import Evaluator
 
 type SyntaxError = ParseError (Token String) String
 type Parser = Parsec String String
 
-parse :: String -> Either SyntaxError Term
-parse code = runParser parseTerm "" code
+parse :: String -> Either String Term
+parse code = 
+  first show (runParser parseTerm "" code) >>= eval
 
 parseTerm :: Parser Term
 parseTerm = (lexeme $ choice
   [ TmNet <$> (symbol "Net" *> integer) <*> integer
   , TmPar <$> (symbol "Par" *> (parens parseTerm)) <*> (parens parseTerm)
   , TmSeq <$> (symbol "Seq" *> (parens parseTerm)) <*> (parens parseTerm)
+  , TmRef <$> (symbol "Ref" *> (name))
+  , TmLet <$> (symbol "Let" *> (name)) <*> (symbol "=" *> parseTerm)
+                           <*> (symbol "in" *> parseTerm)
   ]) <* (optional eof)
 
 integer :: Parser Int
@@ -32,6 +38,9 @@ integer = lexeme Lexer.decimal
 
 parens :: Parser a -> Parser a
 parens = between (symbol "(") (symbol ")")
+
+name :: Parser String
+name = lexeme (many Char.alphaNumChar)
 
 symbol :: String -> Parser String
 symbol = Lexer.symbol sc
