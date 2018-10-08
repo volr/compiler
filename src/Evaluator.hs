@@ -71,9 +71,13 @@ typeOf term =
     TmPar t1 t2 -> do
       left1 <- sizeLeft t1 
       left2 <- sizeLeft t2
-      right1 <- sizeRight t1
-      right2 <- sizeRight t2
-      return $ TyNetwork (left1 + left2) (right1 + right2)
+      if left1 == left2 then do
+        right1 <- sizeRight t1
+        right2 <- sizeRight t2
+        return $ TyNetwork left1 (right1 + right2)
+      else
+        throwError $ "Type error: Parallel networks must share input sizes, got " ++ 
+                     (show left1) ++ " and " ++ (show left2)
     TmLet name t1 t2 -> do
       state <- get
       t1' <- eval' t1
@@ -98,7 +102,7 @@ sizeRight term =
   case term of 
     TmNet _ m -> return m 
     TmSeq t1 t2 -> sizeRight t2
-    TmPar t1 t2 -> sizeRight t2
+    TmPar t1 t2 -> (+) <$> sizeRight t1 <*> sizeRight t2
     TmRef n -> do
       state <- get
       case store state Map.!? n of
