@@ -3,10 +3,6 @@
 sudo: false
 language: c
 
-# Handle git submodules yourself
-git:
-    submodules: false
-
 before_install:
 # Fix stack dependencies
 - sudo apt-get install libblas-dev liblapack-dev
