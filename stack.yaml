@@ -40,7 +40,7 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
 - git: https://github.com/volr/myelin
-  commit: 3e356303614feda32ae0ebe801fe9aefe327ca4e
+  commit: f8684094fc5bb61f3b641aac202c4dd5b9966ce6
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

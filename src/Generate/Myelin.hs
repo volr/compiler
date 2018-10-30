@@ -18,12 +18,14 @@ import AST
 data Target
   = Simulation
   | Hardware
+  deriving (Eq, Show)
 
 data NetworkVisibility
   = InputOutput
   | Input
   | Output
   | Hidden
+  deriving (Eq, Show)
 
 compile :: Target -> Term -> ByteString
 compile target term =
@@ -62,8 +64,8 @@ compile' (TmSeq l r) visibility = do
   projectAll l2 r1
   return (l1, r2)
 compile' (TmPar t b) visibility = do
-  (t1, t2) <- compile' t (leftVisible visibility)
-  (b1, b2) <- compile' b (rightVisible visibility)
+  (t1, t2) <- compile' t visibility
+  (b1, b2) <- compile' b visibility
   return (t1 ++ b1, t2 ++ b2)
 
 projectAll :: [Node] -> [Node] -> SNN () Identity
