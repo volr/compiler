@@ -41,14 +41,14 @@ compile' (TmNet l r) visibility = do
   return ([p1], [p2])
 compile' (TmSeq (TmPar lt lb) (TmPar rt rb)) visibility = do
   (lt1, lt2) <- compile' lt (leftVisible visibility)
-  (lb1, lb2) <- compile' lb Hidden
-  (rt1, rt2) <- compile' rt Hidden
+  (lb1, lb2) <- compile' lb (leftVisible visibility)
+  (rt1, rt2) <- compile' rt (leftVisible visibility)
   (rb1, rb2) <- compile' rb (rightVisible visibility)
   projectAll (lt2 ++ lb2) (rt1 ++ rb1)
   return (lt1 ++ lb1, rt2 ++ rb2)
 compile' (TmSeq (TmPar lt lb) r) visibility = do
   (lt1, lt2) <- compile' lt (leftVisible visibility)
-  (lb1, lb2) <- compile' lb Hidden
+  (lb1, lb2) <- compile' lb (leftVisible visibility)
   (r1, r2) <- compile' r (rightVisible visibility)
   projectAll (lt2 ++ lb2) r1
   return (lt1 ++ lb1, r2)

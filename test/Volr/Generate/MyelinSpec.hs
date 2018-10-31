@@ -24,7 +24,7 @@ pop :: Int -> Int -> Node
 pop size n = Population (fromIntegral size) if_cond_exp (show n) (n + 1)
 
 proj :: Node -> Node -> Edge
-proj n1 n2 = Projection (Static Excitatory (AllToAll (Constant 1.0))) n1 n2
+proj n1 n2 = Projection (Static Excitatory (AllToAll (GaussianRandom 1.0 1.0))) n1 n2
 
 testSimNetwork :: Term -> Network -> PyNNPreample -> IO ()
 testSimNetwork term network preample = 
@@ -63,42 +63,42 @@ spec = do
       let p2 = Projection (Static Excitatory (AllToAll (GaussianRandom 1.0 1.0))) n3 n4
       let network = Network 8 [n1, n3] [] [p1, p2] [n2, n4]
       testSimNetwork (TmPar (TmNet 1 1) (TmNet 1 1)) network defaultPreample
---    it "can connect networks sequentially" $ do
---      let n1 = pop 1 0
---      let n2 = pop 1 2
---      let n3 = pop 1 4
---      let n4 = pop 1 6
---      let p1 = proj n1 n2
---      let p2 = proj n3 n4
---      let p3 = proj n2 n3
---      let state = Network 8 [n1] [n1, n2, n3, n4] [p1, p2, p3] [n4]
---      compile Simulation (TmSeq (TmNet 1 1) (TmNet 1 1)) `shouldBe` stateToJSON state
---    it "can connect sequential and parallel networks" $ do
---      let n1 = pop 1 0
---      let n2 = pop 2 2
---      let n3 = pop 2 4
---      let n4 = pop 2 6
---      let n5 = pop 1 8
---      let n6 = pop 1 10
---      let p1 = proj n1 n2
---      let p2 = proj n3 n4
---      let p3 = proj n5 n6
---      let p4 = proj n2 n3
---      let p5 = proj n2 n5
---      let state = Network 12 [n1] [n1, n2, n3, n4, n5, n6] [p1, p2, p3, p4, p5] [n4, n6]
---      compile Simulation (TmSeq (TmNet 1 2) (TmPar (TmNet 2 2) (TmNet 1 1))) `shouldBe` stateToJSON state
---    it "can connect parallel and sequential networks" $ do
---      let n1 = pop 2 0
---      let n2 = pop 2 2
---      let n3 = pop 1 4
---      let n4 = pop 1 6
---      let n5 = pop 1 8
---      let n6 = pop 1 10
---      let p1 = proj n1 n2
---      let p2 = proj n3 n4
---      let p3 = proj n5 n6
---      let p4 = proj n2 n5
---      let p5 = proj n4 n5
---      let state = Network 12 [n1, n3] [n1, n2, n3, n4, n5, n6] [p1, p2, p3, p4, p5] [n6]
---      compile Simulation (TmSeq (TmPar (TmNet 2 2) (TmNet 1 1)) (TmNet 1 1)) `shouldBe` stateToJSON state
---
+    it "can connect networks sequentially" $ do
+      let n1 = pop 1 0
+      let n2 = pop 1 2
+      let n3 = pop 1 4
+      let n4 = pop 1 6
+      let p1 = proj n1 n2
+      let p2 = proj n3 n4
+      let p3 = proj n2 n3
+      let network = Network 8 [n1] [n2, n3] [p1, p2, p3] [n4]
+      testSimNetwork (TmSeq (TmNet 1 1) (TmNet 1 1)) network defaultPreample
+    it "can connect sequential and parallel networks" $ do
+      let n1 = pop 1 0
+      let n2 = pop 2 2
+      let n3 = pop 2 4
+      let n4 = pop 2 6
+      let n5 = pop 1 8
+      let n6 = pop 1 10
+      let p1 = proj n1 n2
+      let p2 = proj n3 n4
+      let p3 = proj n5 n6
+      let p4 = proj n2 n3
+      let p5 = proj n2 n5
+      let network = Network 12 [n1] [n2, n3, n5] [p1, p2, p3, p4, p5] [n4, n6]
+      testSimNetwork (TmSeq (TmNet 1 2) (TmPar (TmNet 2 2) (TmNet 1 1))) network defaultPreample
+    it "can connect parallel and sequential networks" $ do
+      let n1 = pop 2 0
+      let n2 = pop 2 2
+      let n3 = pop 1 4
+      let n4 = pop 1 6
+      let n5 = pop 1 8
+      let n6 = pop 1 10
+      let p1 = proj n1 n2
+      let p2 = proj n3 n4
+      let p3 = proj n5 n6
+      let p4 = proj n2 n5
+      let p5 = proj n4 n5
+      let network = Network 12 [n1, n3] [n2, n4, n5] [p1, p2, p3, p4, p5] [n6]
+      testSimNetwork (TmSeq (TmPar (TmNet 2 2) (TmNet 1 1)) (TmNet 1 1)) network defaultPreample
+
