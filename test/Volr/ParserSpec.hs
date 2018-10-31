@@ -1,4 +1,4 @@
-module ParserSpec (main, spec) where
+module Volr.ParserSpec (main, spec) where
 
 import Control.Monad.Except
 import Control.Monad.State.Lazy
@@ -7,8 +7,8 @@ import qualified Data.Map.Strict as Map
 
 import Test.Hspec
 
-import AST
-import Parser
+import Volr.AST
+import Volr.Parser
 
 main :: IO()
 main = hspec spec

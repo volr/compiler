@@ -1,4 +1,4 @@
-module Parser where
+module Volr.Parser where
 
 import Control.Applicative hiding (many, some)
 import Control.Monad.State.Lazy
@@ -13,8 +13,8 @@ import qualified Text.Megaparsec.Char as Char
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 import qualified Text.Megaparsec.Pos as Pos
 
-import AST
-import Evaluator
+import Volr.AST
+import Volr.Evaluator
 
 type SyntaxError = ParseError (Token String) String
 type Parser = Parsec String String

@@ -1,4 +1,4 @@
-module Evaluator where
+module Volr.Evaluator where
 
 import Control.Applicative
 import Control.Monad.Except
@@ -7,7 +7,7 @@ import Control.Monad.State.Lazy
 import Data.Either
 import qualified Data.Map.Strict as Map
 
-import AST
+import Volr.AST
 
 type Error = String
 

@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Generate.FutharkSpec (main, spec) where
+module Volr.Generate.FutharkSpec (main, spec) where
 
 import Control.Monad.Except
 import Control.Monad.State.Lazy
@@ -9,8 +9,8 @@ import Text.RawString.QQ
 
 import Test.Hspec
 
-import AST
-import Generate.Futhark
+import Volr.AST
+import Volr.Generate.Futhark
 
 main :: IO()
 main = hspec spec

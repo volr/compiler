@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Generate.MyelinSpec (main, spec) where
+module Volr.Generate.MyelinSpec (main, spec) where
 
 import Control.Monad.Except
 import Data.Aeson

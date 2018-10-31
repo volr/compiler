@@ -1,4 +1,4 @@
-module AST where
+module Volr.AST where
 
 import qualified Data.Map.Strict as Map
 

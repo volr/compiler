@@ -6,10 +6,10 @@ import Options.Applicative
 
 import System.IO (hPutStrLn, stderr)
 
-import AST
-import qualified Parser as VolrParser
-import qualified Generate.Futhark as Futhark
-import qualified Generate.Myelin as Myelin
+import Volr.AST
+import qualified Volr.Parser as VolrParser
+import qualified Volr.Generate.Futhark as Futhark
+import qualified Volr.Generate.Myelin as Myelin
 
 data Configuration = Configuration
   { input :: Input

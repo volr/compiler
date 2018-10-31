@@ -1,5 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Generate.Myelin where
+module Volr.Generate.Myelin where
 
 import Control.Lens
 import Control.Monad (sequence_)
@@ -13,7 +13,7 @@ import qualified Myelin.SNN as SNN (PopulationVisibility (Input, Output, Hidden)
 
 import Myelin.PyNN.PyNN
 
-import AST
+import Volr.AST
 
 data Target
   = Simulation

@@ -1,5 +1,5 @@
 {-# LANGUAGE QuasiQuotes #-}
-module Generate.Futhark where
+module Volr.Generate.Futhark where
 
 import Control.Monad.Except
 import Control.Monad.State.Lazy
@@ -9,7 +9,7 @@ import NeatInterpolation (text)
 import Text.RawString.QQ
 import Text.Printf
 
-import AST
+import Volr.AST
 
 type Error = String
 

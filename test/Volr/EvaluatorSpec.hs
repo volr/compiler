@@ -1,4 +1,4 @@
-module EvaluatorSpec (main, spec) where
+module Volr.EvaluatorSpec (main, spec) where
 
 import Control.Monad.Except
 import Control.Monad.State.Lazy
@@ -7,8 +7,8 @@ import qualified Data.Map.Strict as Map
 
 import Test.Hspec
 
-import AST
-import Evaluator
+import Volr.AST
+import Volr.Evaluator
 
 main :: IO()
 main = hspec spec
