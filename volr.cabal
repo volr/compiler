@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 731d08cc7ccfb8a95385ae4e913df6e5eb62597c9059e50e1f727fc5cd923e62
+-- hash: 5ae876295ec155ff22e875843ba82d7b5e8dbe974a61641989f0c60753d9d6fa
 
 name:           volr
 version:        0.1.0.0
@@ -72,7 +72,6 @@ test-suite futhark-backend-test
       Volr.Generate.FutharkSpec
       Volr.Generate.MyelinSpec
       Volr.ParserSpec
-      Volr.Spec
       Paths_volr
   hs-source-dirs:
       test

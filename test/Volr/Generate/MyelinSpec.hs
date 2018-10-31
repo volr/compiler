@@ -14,8 +14,8 @@ import Myelin.PyNN.PyNN
 
 import Test.Hspec
 
-import AST
-import Generate.Myelin
+import Volr.AST
+import Volr.Generate.Myelin
 
 main :: IO()
 main = hspec spec
