@@ -30,49 +30,65 @@ data NetworkVisibility
 compile :: Target -> Term -> ByteString
 compile target term =
   let network = execState (compile' term InputOutput) initialNetwork
-      preample = PyNNPreample "nest.pyNN" ""
-  in  pack $ either Prelude.id Prelude.id $ translate network preample
+      preample = PyNNPreample ""
+      myelinTarget = case target of
+        Simulation -> Nest 0 0
+        Hardware -> BrainScaleS 0 0
+      task = Task myelinTarget network 50
+  in  case translate task preample of
+        Right out -> pack $ out
+        Left error -> pack $ "Error when compiling network: " ++ error
 
 compile' :: Term -> NetworkVisibility -> SNN ([Node], [Node]) Identity
 compile' (TmNet l r) visibility = do
   p1 <- lifPopulation l (toInput visibility)
   p2 <- lifPopulation r (toOutput visibility)
-  projection (Static Excitatory (AllToAll (GaussianRandom 1 1))) p1 p2 
+  project [p1] [p2]
   return ([p1], [p2])
 compile' (TmSeq (TmPar lt lb) (TmPar rt rb)) visibility = do
   (lt1, lt2) <- compile' lt (leftVisible visibility)
   (lb1, lb2) <- compile' lb (leftVisible visibility)
   (rt1, rt2) <- compile' rt (leftVisible visibility)
   (rb1, rb2) <- compile' rb (rightVisible visibility)
-  projectAll (lt2 ++ lb2) (rt1 ++ rb1)
+  project (lt2 ++ lb2) (rt1 ++ rb1)
   return (lt1 ++ lb1, rt2 ++ rb2)
 compile' (TmSeq (TmPar lt lb) r) visibility = do
   (lt1, lt2) <- compile' lt (leftVisible visibility)
   (lb1, lb2) <- compile' lb (leftVisible visibility)
   (r1, r2) <- compile' r (rightVisible visibility)
-  projectAll (lt2 ++ lb2) r1
+  project (lt2 ++ lb2) r1
   return (lt1 ++ lb1, r2)
 compile' (TmSeq l (TmPar lt lb)) visibility = do
   (l1, l2) <- compile' l (leftVisible visibility)
   (lt1, lt2) <- compile' lt (rightVisible visibility)
   (lb1, lb2) <- compile' lb (rightVisible visibility)
-  projectAll l2 (lt1 ++ lb1)
+  project l2 (lt1 ++ lb1)
   return (l1, lt2 ++ lb2)
 compile' (TmSeq l r) visibility = do
   (l1, l2) <- compile' l (leftVisible visibility)
-  (r1, r2) <- compile' r (rightVisible visibility)
-  projectAll l2 r1
+  (r1, r2) <- compileRight r (rightVisible visibility)
+  project l2 r2
   return (l1, r2)
 compile' (TmPar t b) visibility = do
   (t1, t2) <- compile' t visibility
   (b1, b2) <- compile' b visibility
   return (t1 ++ b1, t2 ++ b2)
 
-projectAll :: [Node] -> [Node] -> SNN () Identity
-projectAll lefts rights = do
-  mapM_ (\n -> mapM_ (\m -> project n m) rights) lefts
+compileRight :: Term -> NetworkVisibility -> SNN ([Node], [Node]) Identity
+compileRight (TmNet l r) v = do
+  r' <- lifPopulation r (toOutput v)
+  return ([r'], [r'])
+compileRight (TmSeq l r) v = do
+  (ll, lr) <- compileRight l v
+  (rl, rr) <- compile' r v
+  project lr rl
+  return (ll, rr)
+compileRight (TmPar t b) v = do
+  (tl, tr) <- compileRight t v
+  (bl, br) <- compileRight b v
+  return (tl ++ bl, tr ++ br)
 
-project :: Node -> Node -> SNN () Identity
+project :: [Node] -> [Node] -> SNN () Identity
 project left right = projection (Static Excitatory (AllToAll (GaussianRandom 1 1))) left right
 
 lifPopulation :: Int -> PopulationVisibility -> SNN Node Identity
