@@ -4,6 +4,7 @@ module Volr.Generate.Futhark where
 import Control.Monad.Except
 import Control.Monad.State.Lazy
 import qualified Data.Map.Strict as Map
+import Data.Maybe
 import Data.Text (unpack, pack)
 import NeatInterpolation (text)
 import Text.RawString.QQ
@@ -37,31 +38,40 @@ instance Show LossFunction where
   show CrossEntropy = "dl.loss.softmax_cross_entropy_with_logits"
 
 data FutharkProgram = FutharkProgram 
-  { train :: Int
-  , validation :: Int
-  , batchSize :: Int
-  , alpha :: Float
+  { train :: Maybe Int
+  , validation :: Maybe Int
+  , batchSize :: Maybe Int
+  , alpha :: Maybe Float
   , lossFunction :: LossFunction
   }
 
+defaultFutharkProgram = FutharkProgram Nothing Nothing Nothing Nothing CrossEntropy
+
 -- | Futhark preample
-programPrefix = [r|import "../lib/deep_learning"
+programPrefix = [r|import "../lib/github.com/HnimNart/deeplearning/deep_learning"
 module dl = deep_learning f32
 |]
+
+programTrainingTestingSplit :: Float -> String -> String
+programTrainingTestingSplit fraction name = 
+  let fractionString = pack $ show fraction
+      nameString = pack name
+  in  unpack [text|  let ${nameString}_l = i32.f64 (f64.i32 m * ${fractionString})
+  let ${nameString} = ${nameString}_l - (${nameString}_l %% batch_size)|]
 
 -- | Futhark main statement
 programSuffix :: FutharkProgram -> String
 programSuffix program = 
-    let trainText = pack $ show $ train program
-        validationText = pack $ show $ validation program
-        batchText = pack $ show $ batchSize program
-        alphaText = pack $ show $ alpha program
+    let trainText = pack $ fromMaybe (programTrainingTestingSplit 0.8 "train") $ fmap show $ train program
+        validationText = pack $ fromMaybe (programTrainingTestingSplit 0.2 "validation") $ fmap show $ validation program
+        batchText = pack $ fromMaybe "128" $ fmap show $ batchSize program
+        alphaText = pack $ fromMaybe "0.1" $ fmap show $ alpha program
         lossText = pack $ show $ lossFunction program
     in  unpack $ [text|
 let main [m] (input:[m][]dl.t) (labels:[m][]dl.t) =
-  let train = ${trainText}
-  let validation = ${validationText}
   let batch_size = ${batchText}
+  ${trainText}
+  ${validationText}
   let alpha = ${alphaText}
   let nn' = dl.train.gradient_descent nn alpha
             input[:train] labels[:train]
@@ -174,11 +184,11 @@ mergeLayer i1 i2 =
 
 sequentialConnection :: Int -> Int -> String
 sequentialConnection n m = 
-  printf "dl.nn.connect_layers (x%d, x%d)" n m
+  printf "dl.nn.connect_layers x%d x%d" n m
 
 parallelConnection :: Int -> Int -> String
 parallelConnection a b = 
-  printf "dl.nn.connect_parallel (x%d, x%d)" a b
+  printf "dl.nn.connect_parallel x%d x%d" a b
 
 toName :: Int -> String
 toName = (++) "x" . show

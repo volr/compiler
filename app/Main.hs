@@ -57,10 +57,9 @@ compileProgram :: Term -> Backend -> IO ()
 compileProgram term backend =
   case backend of
     Futhark -> 
-      let program = Futhark.FutharkProgram 1 1 1 0.1 Futhark.CrossEntropy 
-      in  case Futhark.compile program term of
-            Left error -> hPutStrLn stderr error
-            Right code -> putStrLn code
+      case Futhark.compile Futhark.defaultFutharkProgram term of
+        Left error -> hPutStrLn stderr error
+        Right code -> putStrLn code
     Nest -> 
       BS.putStrLn $ Myelin.compile Myelin.Simulation term 
 
