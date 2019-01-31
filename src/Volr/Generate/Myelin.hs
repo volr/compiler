@@ -89,7 +89,7 @@ compileRight (TmPar t b) v = do
   return (tl ++ bl, tr ++ br)
 
 project :: [Node] -> [Node] -> SNN () Identity
-project left right = projection (Static Excitatory (AllToAll (GaussianRandom 1 1))) left right
+project left right = projection (Static Excitatory (AllToAll (BiasGenerator (Constant 0)) (WeightGenerator (GaussianRandom 1 1)))) left right
 
 lifPopulation :: Int -> PopulationVisibility -> SNN Node Identity
 lifPopulation size visibility = do
