@@ -51,7 +51,7 @@ defaultFutharkProgram = FutharkProgram Nothing Nothing Nothing Nothing CrossEntr
 
 -- | Futhark preample
 programPrefix = [r|import "lib/github.com/HnimNart/deeplearning/deep_learning"
-module dl = deep_learning f32
+module dl = deep_learning f64
 |]
 
 programTrainingTestingSplit :: Float -> String -> String
