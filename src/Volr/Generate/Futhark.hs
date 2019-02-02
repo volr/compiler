@@ -25,10 +25,12 @@ type CompileState = ExceptT Error (State NetworkState)
 
 data Activation
   = Identity
+  | ReLU
   | Sigmoid
 
 instance Show Activation where
   show Identity = "dl.nn.identity"
+  show ReLU     = "dl.nn.relu"
   show Sigmoid  = "dl.nn.sigmoid"
 
 data LossFunction 
@@ -103,7 +105,7 @@ compile' term =
   
 dereference :: Term -> CompileState Int
 dereference (TmNet n m) = do
-  addDefinition $ denseLayer n m Sigmoid 1
+  addDefinition $ denseLayer n m ReLU 1
   deBruijn
 dereference (TmRef name) = do
   state <- get
@@ -120,7 +122,7 @@ dereference (TmLet name t1 t2) = do
   return index'
 dereference (TmSeq (TmNet l1 l2) (TmPar r1 r2)) = do
   indexLeft <- dereference (TmNet l1 l2)
-  indexRep <- addDefinition $ replicateLayer l2 Sigmoid 1
+  indexRep <- addDefinition $ replicateLayer l2 ReLU 1
   connLeft <- addDefinition $  sequentialConnection indexLeft indexRep
   indexP1 <- dereference r1
   indexP2 <- dereference r2
@@ -137,7 +139,7 @@ dereference (TmSeq (TmPar l1 l2) (TmNet r1 r2)) = do
   size2 <- sizeRight l2
   indexMerge <- addDefinition $ mergeLayer size1 size2
   connMerge <- addDefinition $ sequentialConnection indexLeft indexMerge
-  indexDense <- addDefinition $ denseLayer r1 r2 Sigmoid 1
+  indexDense <- addDefinition $ denseLayer r1 r2 ReLU 1
   addDefinition $ sequentialConnection connMerge indexDense
   deBruijn
 dereference (TmSeq (TmPar l1 l2) (TmPar r1 r2)) = do
