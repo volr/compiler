@@ -35,8 +35,9 @@ let main [m] (input:[m][]dl.t) (labels:[m][]dl.t) =
   let nn' = dl.train.gradient_descent nn alpha
             input[:train] labels[:train]
             batch_size dl.loss.softmax_cross_entropy_with_logits
-  in dl.nn.accuracy nn' input[train:train+validation]
+  let acc = dl.nn.accuracy nn' input[train:train+validation]
      labels[train:train+validation] dl.nn.softmax dl.nn.argmax
+  in (acc, nn'.weights)
 |]
       o `shouldBe` Right simpleProgram
   describe "The Futhark compiler" $ do

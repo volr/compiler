@@ -78,8 +78,9 @@ let main [m] (input:[m][]dl.t) (labels:[m][]dl.t) =
   let nn' = dl.train.gradient_descent nn alpha
             input[:train] labels[:train]
             batch_size ${lossText}
-  in dl.nn.accuracy nn' input[train:train+validation]
+  let acc = dl.nn.accuracy nn' input[train:train+validation]
      labels[train:train+validation] dl.nn.softmax dl.nn.argmax
+  in (acc, nn'.weights)
     |]
 
 compile :: FutharkProgram -> Term -> Either Error String
