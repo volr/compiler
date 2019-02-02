@@ -20,7 +20,7 @@ spec = do
   describe "The Futhark program generator" $ do
     it "can generate a simple NN program" $ do
       let o = compile defaultFutharkProgram (TmNet 1 2)
-      let simpleProgram = [r|import "../lib/github.com/HnimNart/deeplearning/deep_learning"
+      let simpleProgram = [r|import "lib/github.com/HnimNart/deeplearning/deep_learning"
 module dl = deep_learning f32
 let x0 = dl.layers.dense (1, 2) dl.nn.relu 1
 

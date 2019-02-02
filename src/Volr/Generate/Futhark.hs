@@ -50,7 +50,7 @@ data FutharkProgram = FutharkProgram
 defaultFutharkProgram = FutharkProgram Nothing Nothing Nothing Nothing CrossEntropy
 
 -- | Futhark preample
-programPrefix = [r|import "../lib/github.com/HnimNart/deeplearning/deep_learning"
+programPrefix = [r|import "lib/github.com/HnimNart/deeplearning/deep_learning"
 module dl = deep_learning f32
 |]
 
